@@ -154,4 +154,9 @@ public class Block {
                 this.previousHash.equals(block.previousHash) &&
                 this.data.equals(block.data);
     }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(index, timestamp, hash, previousHash, data, nonce);
+    }
 }
