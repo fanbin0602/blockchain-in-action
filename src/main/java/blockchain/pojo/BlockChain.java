@@ -126,7 +126,7 @@ public class BlockChain {
     private void calculateNonceAndHash(Block block) {
         long nonce = 0;
         while (true) {
-            System.out.println("当前的 nonce 值是：" + nonce);
+            // System.out.println("当前的 nonce 值是：" + nonce);
             block.setNonce(nonce);
             String hash = HashUtil.getSHA256(block.getOriginal());
             if (isValidHash(hash)) {
@@ -153,6 +153,48 @@ public class BlockChain {
         return true;
     }
 
+    /**
+     * 替换区块链
+     * @param newBlockChain 新区块链数据
+     */
+    public void replaceChain(List<Block> newBlockChain) {
+        // 新的区块链必须是合法的区块链
+        // 新的区块链比当前的区块链长
+        if (isValidBlocks(newBlockChain) && newBlockChain.size() > blockChain.size()) {
+            blockChain = newBlockChain;
+        }
+    }
+
+    /**
+     * 判断一个区块连是否合法
+     * @param blockChain 待判断的区块链数据
+     * @return 判断结果
+     */
+    public boolean isValidBlocks(List<Block> blockChain) {
+        // 新区块链和当前区块链的创世区块链必须是一样的
+        Block genesisBlock = blockChain.get(0);
+        if (!getGenesisBlock().equals(genesisBlock)) {
+            return false;
+        }
+        // 新区块链里面所有的区块都是合法的
+        for (int i = 1; i < blockChain.size(); i++) {
+            // 如果区块不合法，直接返回 false
+            if (!isValidBlock(blockChain.get(i), blockChain.get(i - 1))){
+                System.out.println("区块不合法，索引是：" + i);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * 获取创世区块
+     * @return
+     */
+    private Block getGenesisBlock() {
+        return blockChain.get(0);
+    }
+
     @Override
     public String toString() {
         return "BlockChain{" +
@@ -161,21 +203,68 @@ public class BlockChain {
     }
 
     public static void main(String[] args) {
-        // 创建区块链：初始化，并添加创世区块
-        BlockChain blockChain = new BlockChain();
-        System.out.println(blockChain);
-        // 生成新的区块 block1
-        Block block1 = blockChain.generateNextBlock("你好");
-        // 将 block1 添加到区块链中
-        blockChain.addBlock(block1);
-        // 生成新区块 block2
-        Block block2 = blockChain.generateNextBlock("今天天气不错");
-        // 手动修改信息，触发错误情况
-        block2.setTimestamp(0L);
-        // 将 block2 添加到区块链当中（由于前面修改数据，会造成验证不通过，无法添加）
-        blockChain.addBlock(block2);
-        // 打印当前区块链的所有数据
-        System.out.println(blockChain);
+
+        // 创建两个区块链
+        BlockChain bc1 = new BlockChain();
+        BlockChain bc2 = new BlockChain();
+
+        System.out.println(bc1.getGenesisBlock().equals(bc2.getGenesisBlock()));
+
+        // 向 bc1 添加区块
+        Block block11 = bc1.generateNextBlock("1-1");
+        bc1.addBlock(block11);
+        Block block12 = bc1.generateNextBlock("1-2");
+        bc1.addBlock(block12);
+
+        // 向 bc2 添加区块
+        Block block21 = bc2.generateNextBlock("2-1");
+        bc2.addBlock(block21);
+        Block block22 = bc2.generateNextBlock("2-2");
+        bc2.addBlock(block22);
+        Block block23 = bc2.generateNextBlock("2-3");
+        bc2.addBlock(block23);
+        block23.setHash("lsdjflksdjflksdjflskdjflksjdfklsd");
+
+
+        // 打印两个区块链内容
+        System.out.println("区块链1中的数据：");
+        System.out.println(bc1);
+        System.out.println("区块链2中的数据：");
+        System.out.println(bc2);
+
+        System.out.println("用 bc2 的数据替换 bc1 的数据");
+        bc1.replaceChain(bc2.getBlockChain());
+
+        System.out.println("区块链1中的数据：");
+        System.out.println(bc1);
+        System.out.println("区块链2中的数据：");
+        System.out.println(bc2);
+
+
+
+
+
+
+
+
+
+
+
+//        // 创建区块链：初始化，并添加创世区块
+//        BlockChain blockChain = new BlockChain();
+//        System.out.println(blockChain);
+//        // 生成新的区块 block1
+//        Block block1 = blockChain.generateNextBlock("你好");
+//        // 将 block1 添加到区块链中
+//        blockChain.addBlock(block1);
+//        // 生成新区块 block2
+//        Block block2 = blockChain.generateNextBlock("今天天气不错");
+//        // 手动修改信息，触发错误情况
+//        block2.setTimestamp(0L);
+//        // 将 block2 添加到区块链当中（由于前面修改数据，会造成验证不通过，无法添加）
+//        blockChain.addBlock(block2);
+//        // 打印当前区块链的所有数据
+//        System.out.println(blockChain);
     }
 
 }
