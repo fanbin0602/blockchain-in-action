@@ -13,13 +13,13 @@ import java.util.List;
 public class BlockChain {
 
     /**
-     * 难度
+     * 难度值
      */
     private static final int DIFFICULTY = 3;
     private static final char ZERO = '0';
 
     /**
-     * 区块列表
+     * 区块列表：保存区块链当中的所有区块
      */
     private List<Block> blockChain;
 
@@ -42,10 +42,12 @@ public class BlockChain {
      * @return
      */
     private Block createGenesisBlock() {
+        // 设置创世区块的信息
         Block block = new Block(0,
                 1578000000000L,
                 "0",
                 "GENESIS BLOCK");
+        // 计算 nonce 和哈希值
         calculateNonceAndHash(block);
         return block;
     }
@@ -56,12 +58,14 @@ public class BlockChain {
      * @return 新区块
      */
     private Block generateNextBlock(String data) {
+        // 获取最新的区块
         Block previousBlock = getLastBlock();
+        // 根据最新区块的信息，创建下一个区块
         Block block = new Block(previousBlock.getIndex() + 1,
                 System.currentTimeMillis(),
                 previousBlock.getHash(),
                 data);
-        // 计算 nonce 和 哈希值
+        // 计算下一个区块的 nonce 和 哈希值
         calculateNonceAndHash(block);
         return block;
     }
@@ -71,6 +75,7 @@ public class BlockChain {
      * @return
      */
     private Block getLastBlock() {
+        // 获取区块列表中的最后一个元素
         return blockChain.get(blockChain.size() - 1);
     }
 
@@ -121,11 +126,15 @@ public class BlockChain {
      * @param block
      */
     private void calculateNonceAndHash(Block block) {
+        // 从 0 开始尝试 nonce 值
         long nonce = 0;
+        // 一直循环，每次给 nonce 值 +1，直到计算出符合要求的哈希推出循环
         while (true) {
-            // System.out.println("当前的 nonce 值是：" + nonce);
+            // 把当前的 nonce 值赋值给区块的 nonce 属性
             block.setNonce(nonce);
+            // 计算哈希值
             String hash = HashUtil.getSHA256(block.getOriginal());
+            // 如果哈希值符合难度要求，则把符合要求的哈希值赋值给区块的哈希值，结束循环
             if (isValidHash(hash)) {
                 System.out.println("找到了合法的哈希值：" + hash);
                 block.setHash(hash);
@@ -141,8 +150,12 @@ public class BlockChain {
      * @return
      */
     private boolean isValidHash(String hash) {
+        // 如果哈希值为空，则不合法
         if (hash == null) { return false; }
+        // 循环判断哈希值的每个字符
         for (int i = 0; i < hash.length(); i++) {
+            // 判断第一个不是0的字符是哈希值的第几位
+            // 如果这个位数大于难度值，则哈希值符合难度要求
             if (hash.charAt(i) != ZERO) {
                 return i >= DIFFICULTY;
             }
@@ -155,9 +168,9 @@ public class BlockChain {
      * @param newBlockChain 新区块链数据
      */
     public void replaceChain(List<Block> newBlockChain) {
-        // 新的区块链必须是合法的区块链
-        // 新的区块链比当前的区块链长
+        // 验证条件：新的区块链必须是合法的区块链 并且 新的区块链比当前的区块链长
         if (isValidBlocks(newBlockChain) && newBlockChain.size() > blockChain.size()) {
+            // 验证通过，直接把新的区块列表赋值给区块链中的 blockChain 属性
             blockChain = newBlockChain;
         }
     }
@@ -175,7 +188,7 @@ public class BlockChain {
         }
         // 新区块链里面所有的区块都是合法的
         for (int i = 1; i < blockChain.size(); i++) {
-            // 如果区块不合法，直接返回 false
+            // 如果有任意一个区块不合法，直接返回 false
             if (!isValidBlock(blockChain.get(i), blockChain.get(i - 1))){
                 System.out.println("区块不合法，索引是：" + i);
                 return false;
@@ -189,6 +202,7 @@ public class BlockChain {
      * @return
      */
     private Block getGenesisBlock() {
+        // 直接获取区块列表中的第一个元素即可
         return blockChain.get(0);
     }
 
