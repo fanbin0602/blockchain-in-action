@@ -53,20 +53,6 @@ public class Block {
         this.data = data;
     }
 
-    public Block(int index,
-                 long timestamp,
-                 String hash,
-                 String previousHash,
-                 String data,
-                 long nonce) {
-        this.index = index;
-        this.timestamp = timestamp;
-        this.hash = hash;
-        this.previousHash = previousHash;
-        this.data = data;
-        this.nonce = nonce;
-    }
-
     public int getIndex() {
         return index;
     }
@@ -144,8 +130,11 @@ public class Block {
     public boolean equals(Object o) {
         // 如果两个指向同一个对象，则相等
         if (this == o) { return true; }
+        // 如果比较对象为空，则判定为不想等
         if (o == null) { return false; }
+        // 如果比较比较对象和当前对象不是同一类型，判定为不想等
         if (o.getClass() != this.getClass()) {return false; }
+        // 强制转换类型，并比较每一个属性是否相等
         Block block = (Block) o;
         return this.index == block.index &&
                 this.timestamp == block.timestamp &&
