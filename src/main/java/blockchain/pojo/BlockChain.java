@@ -45,42 +45,98 @@ public class BlockChain {
         Block block = new Block();
         block.setIndex(0);
         block.setTimestamp(1578000000000L);
-        block.setHash("000c81784691c7bb8bacab6affb23312fd707bf0463e9afc217ce1a32ab3a4aa");
         block.setPreviousHash("0");
         block.setData("GENESIS BLOCK");
-        block.setNonce(1545);
+        calculateNonceAndHash(block);
         return block;
     }
 
     /**
-     * 挖矿（计算 nonce 和哈希值）
-     * @param index
-     * @param previousHash
-     * @param timestamp
-     * @param data
-     * @param nonce
-     * @param block
+     * 生成下一个区块
+     * @param data 区块中的数据
+     * @return 新区块
+     */
+    private Block generateNextBlock(String data) {
+        Block block = new Block();
+        // 给 索引、时间戳、前一区块的哈希值、数据 这四个属性赋值
+        Block previousBlock = getLastBlock();
+        block.setIndex(previousBlock.getIndex() + 1);
+        block.setTimestamp(System.currentTimeMillis());
+        block.setPreviousHash(previousBlock.getHash());
+        block.setData(data);
+        // 计算 nonce 和 哈希值
+        calculateNonceAndHash(block);
+        return block;
+    }
+
+    /**
+     * 获取当前区块链中最新的区块
      * @return
      */
-    private String calculateNonceAndHash(int index, String previousHash, long timestamp,
-                                         String data, long nonce, Block block) {
+    private Block getLastBlock() {
+        return blockChain.get(blockChain.size() - 1);
+    }
+
+    /**
+     * 向区块链中添加新的区块
+     * @param block 要被添加的区块
+     */
+    public void addBlock(Block block) {
+        // 先判断新区块的合法性，再添加
+        if (isValidBlock(block, getLastBlock())) {
+            blockChain.add(block);
+        }
+    }
+
+    /**
+     * 验证区块是否合法
+     * @param block 待验证的区块
+     * @param previousBlock 前一个区块
+     * @return 是否合法
+     */
+    public boolean isValidBlock(Block block, Block previousBlock) {
+        // 判断索引
+        if (block.getIndex() != previousBlock.getIndex() + 1) {
+            System.out.println("索引错误");
+            return false;
+        }
+        // 判断时间戳
+        if (block.getTimestamp() < previousBlock.getTimestamp()) {
+            System.out.println("时间戳错误");
+            return false;
+        }
+        // 判断前一区块哈希
+        if (!block.getPreviousHash().equals(previousBlock.getHash())) {
+            System.out.println("前一区块哈希错误");
+            return false;
+        }
+        // 判断哈希值是否正确
+        if (!HashUtil.getSHA256(block.getOriginal()).equals(block.getHash())) {
+            System.out.println("哈希值错误");
+            return false;
+        }
+        System.out.println("区块合法");
+        return true;
+    }
+
+    /**
+     * 挖矿（计算 nonce 和哈希值）
+     * @param block
+     */
+    private void calculateNonceAndHash(Block block) {
+        long nonce = 0;
         while (true) {
             System.out.println("当前的 nonce 值是：" + nonce);
-            String str = index + previousHash + timestamp + data + nonce;
-            String hash = HashUtil.getSHA256(str);
+            block.setNonce(nonce);
+            String hash = HashUtil.getSHA256(block.getOriginal());
             if (isValidHash(hash)) {
                 System.out.println("找到了合法的哈希值：" + hash);
-                block.setIndex(index); block.setPreviousHash(previousHash);
-                block.setTimestamp(timestamp); block.setData(data);
-                block.setNonce(nonce); block.setHash(hash);
+                block.setHash(hash);
                 break;
             }
             nonce++;
         }
-        return block.getHash();
     }
-    // private static final int DIFFICULTY = 3;
-    // private static final char ZERO = '0';
 
     /**
      * 验证哈希值是否合法
@@ -97,22 +153,29 @@ public class BlockChain {
         return true;
     }
 
+    @Override
+    public String toString() {
+        return "BlockChain{" +
+                "blockChain=" + blockChain +
+                '}';
+    }
+
     public static void main(String[] args) {
-
-        Block block = new Block();
-        block.setIndex(0);
-        block.setTimestamp(1578000000000L);
-        //block.setHash("000c81784691c7bb8bacab6affb23312fd707bf0463e9afc217ce1a32ab3a4aa");
-        block.setPreviousHash("0");
-        block.setData("GENESIS BLOCK");
-        //block.setNonce(1545);
-
-        BlockChain blockchain = new BlockChain();
-        String hash = blockchain.calculateNonceAndHash(
-                block.getIndex(), block.getPreviousHash(), block.getTimestamp(),
-                block.getData(), 0, block
-        );
-
+        // 创建区块链：初始化，并添加创世区块
+        BlockChain blockChain = new BlockChain();
+        System.out.println(blockChain);
+        // 生成新的区块 block1
+        Block block1 = blockChain.generateNextBlock("你好");
+        // 将 block1 添加到区块链中
+        blockChain.addBlock(block1);
+        // 生成新区块 block2
+        Block block2 = blockChain.generateNextBlock("今天天气不错");
+        // 手动修改信息，触发错误情况
+        block2.setTimestamp(0L);
+        // 将 block2 添加到区块链当中（由于前面修改数据，会造成验证不通过，无法添加）
+        blockChain.addBlock(block2);
+        // 打印当前区块链的所有数据
+        System.out.println(blockChain);
     }
 
 }

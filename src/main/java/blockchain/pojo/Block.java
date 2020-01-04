@@ -105,6 +105,14 @@ public class Block {
         this.nonce = nonce;
     }
 
+    /**
+     * 获取计算哈希值的原像字符串
+     * @return
+     */
+    public String getOriginal() {
+        return index + previousHash + timestamp + data + nonce;
+    }
+
     @Override
     public String toString() {
         return "Block{" +
