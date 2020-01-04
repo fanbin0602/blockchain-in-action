@@ -9,6 +9,10 @@ import java.security.MessageDigest;
  */
 public class HashUtil {
 
+    private HashUtil() {
+
+    }
+
     /**
      * 计算给定字符串的 SHA-256 哈希值
      * @param str 原像

@@ -42,11 +42,10 @@ public class BlockChain {
      * @return
      */
     private Block createGenesisBlock() {
-        Block block = new Block();
-        block.setIndex(0);
-        block.setTimestamp(1578000000000L);
-        block.setPreviousHash("0");
-        block.setData("GENESIS BLOCK");
+        Block block = new Block(0,
+                1578000000000L,
+                "0",
+                "GENESIS BLOCK");
         calculateNonceAndHash(block);
         return block;
     }
@@ -57,13 +56,11 @@ public class BlockChain {
      * @return 新区块
      */
     private Block generateNextBlock(String data) {
-        Block block = new Block();
-        // 给 索引、时间戳、前一区块的哈希值、数据 这四个属性赋值
         Block previousBlock = getLastBlock();
-        block.setIndex(previousBlock.getIndex() + 1);
-        block.setTimestamp(System.currentTimeMillis());
-        block.setPreviousHash(previousBlock.getHash());
-        block.setData(data);
+        Block block = new Block(previousBlock.getIndex() + 1,
+                System.currentTimeMillis(),
+                previousBlock.getHash(),
+                data);
         // 计算 nonce 和 哈希值
         calculateNonceAndHash(block);
         return block;
@@ -223,7 +220,7 @@ public class BlockChain {
         bc2.addBlock(block22);
         Block block23 = bc2.generateNextBlock("2-3");
         bc2.addBlock(block23);
-        block23.setHash("lsdjflksdjflksdjflskdjflksjdfklsd");
+        // block23.setHash("lsdjflksdjflksdjflskdjflksjdfklsd");
 
 
         // 打印两个区块链内容
@@ -239,15 +236,6 @@ public class BlockChain {
         System.out.println(bc1);
         System.out.println("区块链2中的数据：");
         System.out.println(bc2);
-
-
-
-
-
-
-
-
-
 
 
 //        // 创建区块链：初始化，并添加创世区块

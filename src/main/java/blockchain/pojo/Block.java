@@ -45,6 +45,16 @@ public class Block {
 
     public Block(int index,
                  long timestamp,
+                 String previousHash,
+                 String data) {
+        this.index = index;
+        this.timestamp = timestamp;
+        this.previousHash = previousHash;
+        this.data = data;
+    }
+
+    public Block(int index,
+                 long timestamp,
                  String hash,
                  String previousHash,
                  String data,
