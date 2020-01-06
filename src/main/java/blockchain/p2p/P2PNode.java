@@ -54,23 +54,31 @@ public class P2PNode {
             @Override
             public void onOpen(WebSocket conn, ClientHandshake handshake) {
                 System.out.println("server:被客户端连接：" + conn.getRemoteSocketAddress());
+                sockets.add(conn);
             }
 
             @Override
             public void onClose(WebSocket conn, int code, String reason, boolean remote) {
                 System.out.println("server:连接被关闭：" + conn.getRemoteSocketAddress());
+                sockets.remove(conn);
             }
 
             @Override
             public void onMessage(WebSocket conn, String message) {
                 System.out.println("server:收到客户端的信息，来自：" + conn.getRemoteSocketAddress());
                 System.out.println("server:收到客户端的信息，内容是：" + message);
-                conn.send("你刚才对我说：" + message);
+                try {
+                    handleMessage(conn, JSON.parseObject(message, Message.class));
+                } catch (Exception ex) {
+                    System.out.println("处理消息异常");
+                    ex.printStackTrace();
+                }
             }
 
             @Override
             public void onError(WebSocket conn, Exception ex) {
                 System.out.println("server:连接发生错误：" + conn.getRemoteSocketAddress());
+                sockets.remove(conn);
                 ex.printStackTrace();
             }
 
@@ -90,13 +98,24 @@ public class P2PNode {
      */
     public void connectToNode(String remote) {
 
+        // 从 remote 当中获取主机地址
+        String host = remote.split(":")[1].split("//")[1];
+
+        for (WebSocket socket : sockets) {
+            InetSocketAddress address = socket.getRemoteSocketAddress();
+            if (address.getHostName().equals(host)) {
+                return;
+            }
+        }
+
         try {
 
             final WebSocketClient client = new WebSocketClient(new URI(remote)) {
                 @Override
                 public void onOpen(ServerHandshake handshakedata) {
                     System.out.println("client:连接服务端成功");
-                    this.send("你好啊");
+                    sockets.add(this);
+                    this.send(reqLatestBlockMsg());
                 }
 
                 @Override
@@ -107,11 +126,13 @@ public class P2PNode {
                 @Override
                 public void onClose(int code, String reason, boolean remote) {
                     System.out.println("client:与服务端断开连接");
+                    sockets.remove(this);
                 }
 
                 @Override
                 public void onError(Exception ex) {
                     System.out.println("client:与服务端连接出错");
+                    sockets.remove(this);
                 }
             };
             client.connect();
@@ -120,6 +141,43 @@ public class P2PNode {
             ex.printStackTrace();
         }
 
+    }
+
+    /**
+     * 广播消息
+     * @param message 要广播的消息内容
+     */
+    private void broadcast(String message) {
+        for (WebSocket socket : sockets) {
+            socket.send(message);
+        }
+    }
+
+    /**
+     * 广播最新区块
+     */
+    private void broadcastLatestBlock() {
+        broadcast(resLatestBlockMsg());
+    }
+
+    /**
+     * 处理接收到的消息
+     * @param socket 远程连接
+     * @param message 收到的消息
+     */
+    private void handleMessage(WebSocket socket, Message message) {
+        // 处理收到的消息
+        System.out.println("开始处理收到的消息：" + JSON.toJSONString(message));
+        switch (message.getType()) {
+            case Constant.REQ_LATEST_BLOCK:
+                break;
+            case Constant.REQ_BLOCK_CHAIN:
+                break;
+            case Constant.RES_LATEST_BLOCK:
+                break;
+            case Constant.RES_BLOCK_CHAIN:
+                break;
+        }
     }
 
     /**
@@ -154,20 +212,37 @@ public class P2PNode {
      */
     private String resBlockChainMsg() {
         String data = JSON.toJSONString(this.blockChain.getBlockChain());
-        return JSON.toJSONString(new Message(Constant.RES_BLOCK_CHAIN));
+        return JSON.toJSONString(new Message(Constant.RES_BLOCK_CHAIN, data));
     }
 
     public static void main(String[] args) throws InterruptedException {
-        // 创建区块链对象
-        BlockChain bc = new BlockChain();
-        // 创建P2P节点对象
-        P2PNode p2p = new P2PNode(bc);
-        // 初始化P2P节点（创建服务端并启动）
-        p2p.initNode(7001);
-        // 等待1秒钟
-        Thread.sleep(1000);
-        // 创建客户端并向服务端发起连接
-        p2p.connectToNode("ws://127.0.0.1:7001");
+//        // 创建区块链对象
+//        BlockChain bc = new BlockChain();
+//        // 创建P2P节点对象
+//        P2PNode p2p = new P2PNode(bc);
+//        // 初始化P2P节点（创建服务端并启动）
+//        p2p.initNode(7001);
+//        // 等待1秒钟
+//        Thread.sleep(1000);
+//        // 创建客户端并向服务端发起连接
+//        p2p.connectToNode("ws://127.0.0.1:7001");
+
+
+
+//        BlockChain bc = new BlockChain();
+//        bc.addBlock(bc.generateNextBlock("hello"));
+//        P2PNode p2p = new P2PNode(bc);
+//
+//        System.out.println(p2p.reqLatestBlockMsg());
+//        System.out.println(p2p.resLatestBlockMsg());
+//        System.out.println(p2p.reqBlockChainMsg());
+//        System.out.println(p2p.resBlockChainMsg());
+
+        String remote = "ws://127.0.0.1:7001";
+        String host = remote.split(":")[1].split("//")[1];
+        System.out.println(host);
+
+
     }
 
 
