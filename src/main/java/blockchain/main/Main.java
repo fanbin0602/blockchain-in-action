@@ -13,17 +13,17 @@ import java.util.List;
 public class Main {
     public static void main(String[] args) {
         BlockChain bc = new BlockChain();
-        String data = JSON.toJSONString(bc.getBlockChain());
+        String data = JSON.toJSONString(bc.getBlockChain().get(0));
         System.out.println(data);
 
-        List<Block> blocks = null;
+        Block block = null;
         try {
-            blocks = JSON.parseArray(data, Block.class);
+            block = JSON.parseObject(data, Block.class);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
 
-        System.out.println(blocks);
+        System.out.println(block);
 
     }
 }

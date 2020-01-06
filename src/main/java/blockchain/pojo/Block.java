@@ -2,12 +2,14 @@ package blockchain.pojo;
 
 import com.google.common.base.Objects;
 
+import java.io.Serializable;
+
 /**
  * 区块
  * @author fanbin
  * @date 2020/1/3
  */
-public class Block {
+public class Block implements Serializable {
 
     /**
      * 索引
