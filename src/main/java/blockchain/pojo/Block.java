@@ -105,7 +105,7 @@ public class Block {
      * 获取计算哈希值的原像字符串
      * @return
      */
-    public String getOriginal() {
+    public String originalString() {
         return index + previousHash + timestamp + data + nonce;
     }
 

@@ -57,7 +57,7 @@ public class BlockChain {
      * @param data 区块中的数据
      * @return 新区块
      */
-    private Block generateNextBlock(String data) {
+    public Block generateNextBlock(String data) {
         // 获取最新的区块
         Block previousBlock = getLastBlock();
         // 根据最新区块的信息，创建下一个区块
@@ -113,7 +113,7 @@ public class BlockChain {
             return false;
         }
         // 判断哈希值是否正确
-        if (!HashUtil.getSHA256(block.getOriginal()).equals(block.getHash())) {
+        if (!HashUtil.getSHA256(block.originalString()).equals(block.getHash())) {
             System.out.println("哈希值错误");
             return false;
         }
@@ -133,7 +133,7 @@ public class BlockChain {
             // 把当前的 nonce 值赋值给区块的 nonce 属性
             block.setNonce(nonce);
             // 计算哈希值
-            String hash = HashUtil.getSHA256(block.getOriginal());
+            String hash = HashUtil.getSHA256(block.originalString());
             // 如果哈希值符合难度要求，则把符合要求的哈希值赋值给区块的哈希值，结束循环
             if (isValidHash(hash)) {
                 System.out.println("找到了合法的哈希值：" + hash);
