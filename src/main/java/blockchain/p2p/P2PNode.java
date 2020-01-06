@@ -71,6 +71,7 @@ public class P2PNode {
                     handleMessage(conn, JSON.parseObject(message, Message.class));
                 } catch (Exception ex) {
                     System.out.println("处理消息异常");
+                    System.out.println("消息内容：" + message);
                     ex.printStackTrace();
                 }
             }
@@ -121,6 +122,13 @@ public class P2PNode {
                 @Override
                 public void onMessage(String message) {
                     System.out.println("client:收到服务端的信息：" + message);
+                    try {
+                        handleMessage(this, JSON.parseObject(message, Message.class));
+                    } catch (Exception ex) {
+                        System.out.println("处理消息异常");
+                        System.out.println("消息内容：" + message);
+                        ex.printStackTrace();
+                    }
                 }
 
                 @Override
