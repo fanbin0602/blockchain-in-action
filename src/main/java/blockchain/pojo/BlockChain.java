@@ -74,7 +74,7 @@ public class BlockChain {
      * 获取当前区块链中最新的区块
      * @return
      */
-    private Block getLastBlock() {
+    public Block getLastBlock() {
         // 获取区块列表中的最后一个元素
         return blockChain.get(blockChain.size() - 1);
     }

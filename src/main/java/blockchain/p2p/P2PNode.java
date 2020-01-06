@@ -1,6 +1,10 @@
 package blockchain.p2p;
 
+import blockchain.msg.Constant;
+import blockchain.msg.Message;
+import blockchain.pojo.Block;
 import blockchain.pojo.BlockChain;
+import com.alibaba.fastjson.JSON;
 import org.java_websocket.WebSocket;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ClientHandshake;
@@ -118,11 +122,51 @@ public class P2PNode {
 
     }
 
+    /**
+     * 生成消息文本：请求最新区块
+     * @return
+     */
+    private String reqLatestBlockMsg() {
+        return JSON.toJSONString(new Message(Constant.REQ_LATEST_BLOCK));
+    }
+
+    /**
+     * 生成消息文本：请求区块列表
+     * @return
+     */
+    private String reqBlockChainMsg() {
+        return JSON.toJSONString(new Message(Constant.REQ_BLOCK_CHAIN));
+    }
+
+    /**
+     * 生成消息文本：响应最新区块
+     * @return
+     */
+    private String resLatestBlockMsg() {
+        Block block = this.blockChain.getLastBlock();
+        String data = JSON.toJSONString(block);
+        return JSON.toJSONString(new Message(Constant.RES_LATEST_BLOCK, data));
+    }
+
+    /**
+     * 生成消息文本：响应区块列表
+     * @return
+     */
+    private String resBlockChainMsg() {
+        String data = JSON.toJSONString(this.blockChain.getBlockChain());
+        return JSON.toJSONString(new Message(Constant.RES_BLOCK_CHAIN));
+    }
+
     public static void main(String[] args) throws InterruptedException {
+        // 创建区块链对象
         BlockChain bc = new BlockChain();
+        // 创建P2P节点对象
         P2PNode p2p = new P2PNode(bc);
+        // 初始化P2P节点（创建服务端并启动）
         p2p.initNode(7001);
+        // 等待1秒钟
         Thread.sleep(1000);
+        // 创建客户端并向服务端发起连接
         p2p.connectToNode("ws://127.0.0.1:7001");
     }
 
