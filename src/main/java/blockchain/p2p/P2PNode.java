@@ -33,6 +33,10 @@ public class P2PNode {
      */
     private BlockChain blockChain;
 
+    public BlockChain getBlockChain() {
+        return blockChain;
+    }
+
     /**
      * 构造方法
      * @param blockChain
