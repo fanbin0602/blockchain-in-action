@@ -198,9 +198,11 @@ public class P2PNode {
      */
     private void handleBlockResponse(String data) {
         List<Block> blocksReceived = JSON.parseArray(data, Block.class);
+        // 收到的最新区块
         Block latestBlockReceived = blocksReceived.get(blocksReceived.size() - 1);
+        // 本地的最新区块
         Block latestBlock = blockChain.getLastBlock();
-
+        // 判断收到的区块索引是否大于本地最新区块的索引，否则不处理
         if (latestBlockReceived.getIndex() > latestBlock.getIndex()) {
             // 判断能不能直接追加在本地区块链末尾
             if (latestBlock.getHash().equals(latestBlockReceived.getPreviousHash())
@@ -209,9 +211,11 @@ public class P2PNode {
                 blockChain.addBlock(latestBlockReceived);
                 broadcastLatestBlock();
             } else if (blocksReceived.size() == 1) {
+                // 如果收到的是最新区块，则请求整个区块列表
                 System.out.println("向对方请求整个区块列表");
                 broadcast(reqBlockChainMsg());
             } else {
+                // 如果收到的是区块列表，则替换本地区块列表
                 System.out.println("替换本地的区块列表");
                 blockChain.replaceChain(blocksReceived);
                 broadcastLatestBlock();
@@ -257,16 +261,18 @@ public class P2PNode {
     }
 
     public static void main(String[] args) throws InterruptedException {
-//        // 创建区块链对象
-//        BlockChain bc = new BlockChain();
-//        // 创建P2P节点对象
-//        P2PNode p2p = new P2PNode(bc);
-//        // 初始化P2P节点（创建服务端并启动）
-//        p2p.initNode(7001);
-//        // 等待1秒钟
-//        Thread.sleep(1000);
-//        // 创建客户端并向服务端发起连接
-//        p2p.connectToNode("ws://127.0.0.1:7001");
+        // 创建区块链对象
+        BlockChain bc = new BlockChain();
+        // 创建P2P节点对象
+        P2PNode p2p = new P2PNode(bc);
+        // 初始化P2P节点（创建服务端并启动）
+        p2p.initNode(7001);
+        // 等待1秒钟
+        Thread.sleep(1000);
+        // 创建客户端并向服务端发起连接
+        p2p.connectToNode("ws://172.18.0.82:7000");
+
+        // ws://172.18.0.82:7000
 
 
 
@@ -279,9 +285,9 @@ public class P2PNode {
 //        System.out.println(p2p.reqBlockChainMsg());
 //        System.out.println(p2p.resBlockChainMsg());
 
-        String remote = "ws://127.0.0.1:7001";
-        String host = remote.split(":")[1].split("//")[1];
-        System.out.println(host);
+//        String remote = "ws://127.0.0.1:7001";
+//        String host = remote.split(":")[1].split("//")[1];
+//        System.out.println(host);
 
 
     }
