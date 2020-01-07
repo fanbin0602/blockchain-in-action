@@ -4,8 +4,6 @@ import blockchain.pojo.Block;
 import blockchain.pojo.BlockChain;
 import com.alibaba.fastjson.JSON;
 
-import java.util.List;
-
 /**
  * @author fanbin
  * @date 2020/1/3

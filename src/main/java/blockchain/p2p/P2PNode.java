@@ -177,14 +177,47 @@ public class P2PNode {
         // 处理收到的消息
         System.out.println("开始处理收到的消息：" + JSON.toJSONString(message));
         switch (message.getType()) {
+            // 收到请求最新区块链的消息
             case Constant.REQ_LATEST_BLOCK:
+                socket.send(resLatestBlockMsg());
                 break;
+            // 收到请求整个区块列表的消息
             case Constant.REQ_BLOCK_CHAIN:
+                socket.send(resBlockChainMsg());
                 break;
-            case Constant.RES_LATEST_BLOCK:
+            // 收到对方发来的区块数据（最新区块或整个区块列表）
+            case Constant.RES_BLOCKS:
+                handleBlockResponse(message.getData());
                 break;
-            case Constant.RES_BLOCK_CHAIN:
-                break;
+        }
+    }
+
+    /**
+     * 处理收到的最新区块链的消息
+     * @param data
+     */
+    private void handleBlockResponse(String data) {
+        List<Block> blocksReceived = JSON.parseArray(data, Block.class);
+        Block latestBlockReceived = blocksReceived.get(blocksReceived.size() - 1);
+        Block latestBlock = blockChain.getLastBlock();
+
+        if (latestBlockReceived.getIndex() > latestBlock.getIndex()) {
+            // 判断能不能直接追加在本地区块链末尾
+            if (latestBlock.getHash().equals(latestBlockReceived.getPreviousHash())
+                    && latestBlock.getIndex() + 1 == latestBlockReceived.getIndex()) {
+                System.out.println("在本地区块链末尾追加接收到的新区块");
+                blockChain.addBlock(latestBlockReceived);
+                broadcastLatestBlock();
+            } else if (blocksReceived.size() == 1) {
+                System.out.println("向对方请求整个区块列表");
+                broadcast(reqBlockChainMsg());
+            } else {
+                System.out.println("替换本地的区块列表");
+                blockChain.replaceChain(blocksReceived);
+                broadcastLatestBlock();
+            }
+        } else {
+            System.out.println("对方的区块链不比本地的更长，不作处理");
         }
     }
 
@@ -209,9 +242,9 @@ public class P2PNode {
      * @return
      */
     private String resLatestBlockMsg() {
-        Block block = this.blockChain.getLastBlock();
+        Block[] block = {this.blockChain.getLastBlock()};
         String data = JSON.toJSONString(block);
-        return JSON.toJSONString(new Message(Constant.RES_LATEST_BLOCK, data));
+        return JSON.toJSONString(new Message(Constant.RES_BLOCKS, data));
     }
 
     /**
@@ -220,7 +253,7 @@ public class P2PNode {
      */
     private String resBlockChainMsg() {
         String data = JSON.toJSONString(this.blockChain.getBlockChain());
-        return JSON.toJSONString(new Message(Constant.RES_BLOCK_CHAIN, data));
+        return JSON.toJSONString(new Message(Constant.RES_BLOCKS, data));
     }
 
     public static void main(String[] args) throws InterruptedException {

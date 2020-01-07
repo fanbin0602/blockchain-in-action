@@ -17,19 +17,14 @@ public class Constant {
     public static final int REQ_LATEST_BLOCK = 0;
 
     /**
-     * 响应最新区块
-     */
-    public static final int RES_LATEST_BLOCK = 1;
-
-    /**
      * 请求整个区块链
      */
-    public static final int REQ_BLOCK_CHAIN = 2;
+    public static final int REQ_BLOCK_CHAIN = 1;
 
     /**
-     * 响应整个区块链
+     * 响应区块数据
      */
-    public static final int RES_BLOCK_CHAIN = 3;
+    public static final int RES_BLOCKS = 2;
 
 
 }
