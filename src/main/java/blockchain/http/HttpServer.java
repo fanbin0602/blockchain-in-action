@@ -60,7 +60,12 @@ public class HttpServer {
         @Override
         protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
             resp.setCharacterEncoding("UTF-8");
-            resp.getWriter().println(JSON.toJSONString("Hello, world!"));
+            String str = "Hello, world!";
+            String name = req.getParameter("name");
+            if (name != null && name.length() > 0) {
+                str = "Hello, " + name + "!";
+            }
+            resp.getWriter().println(JSON.toJSONString(str));
         }
     }
 
