@@ -110,6 +110,7 @@ public class HttpServer {
             resp.setCharacterEncoding("UTF-8");
             // 从请求参数中获取新区块中将要保存的数据
             String data = req.getParameter("data");
+            System.out.println("data=" + data);
             // 生成新区块
             Block newBlock = blockChain.generateNextBlock(data);
             // 把生成的新区块追加到区块链末尾
@@ -161,6 +162,8 @@ public class HttpServer {
             resp.getWriter().println(content);
         }
     }
+
+    // ws://172.18.0.82:7001
 
     public static void main(String[] args) {
         BlockChain bc = new BlockChain();
