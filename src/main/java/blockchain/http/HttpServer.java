@@ -47,7 +47,11 @@ public class HttpServer {
                     new ServletContextHandler(ServletContextHandler.SESSIONS);
             context.setContextPath("/block-chain");
             server.setHandler(context);
+
             context.addServlet(new ServletHolder(new HelloServlet()), "/hello");
+
+            context.addServlet(new ServletHolder(new BlocksServlet()), "/blocks");
+
             server.start();
             server.join();
         } catch (Exception ex) {
@@ -66,6 +70,18 @@ public class HttpServer {
                 str = "Hello, " + name + "!";
             }
             resp.getWriter().println(JSON.toJSONString(str));
+        }
+    }
+
+    /**
+     * 查看区块列表数据
+     */
+    private class BlocksServlet extends HttpServlet {
+        @Override
+        protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+            resp.setCharacterEncoding("UTF-8");
+            String content = JSON.toJSONString(blockChain.getBlockChain());
+            resp.getWriter().println(content);
         }
     }
 

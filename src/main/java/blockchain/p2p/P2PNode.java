@@ -272,7 +272,7 @@ public class P2PNode {
         // 初始化P2P节点（创建服务端并启动）
         p2p.initNode(7001);
         // 等待1秒钟
-        Thread.sleep(1000);
+        // Thread.sleep(1000);
         // 创建客户端并向服务端发起连接
         p2p.connectToNode("ws://172.18.0.82:7000");
 
@@ -284,10 +284,10 @@ public class P2PNode {
 //        bc.addBlock(bc.generateNextBlock("hello"));
 //        P2PNode p2p = new P2PNode(bc);
 //
-//        System.out.println(p2p.reqLatestBlockMsg());
-//        System.out.println(p2p.resLatestBlockMsg());
-//        System.out.println(p2p.reqBlockChainMsg());
-//        System.out.println(p2p.resBlockChainMsg());
+        System.out.println(p2p.reqLatestBlockMsg());
+        System.out.println(p2p.resLatestBlockMsg());
+        System.out.println(p2p.reqBlockChainMsg());
+        System.out.println(p2p.resBlockChainMsg());
 
 //        String remote = "ws://127.0.0.1:7001";
 //        String host = remote.split(":")[1].split("//")[1];
