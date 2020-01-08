@@ -7,12 +7,18 @@ import com.alibaba.fastjson.JSON;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.java_websocket.WebSocket;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * HTTP 服务
@@ -53,6 +59,8 @@ public class HttpServer {
 
             context.addServlet(new ServletHolder(new BlocksServlet()), "/blocks");
             context.addServlet(new ServletHolder(new MineBlockServlet()), "/mineBlock");
+            context.addServlet(new ServletHolder(new AddPeerServlet()), "/addPeer");
+            context.addServlet(new ServletHolder(new PeersServlet()), "/peers");
 
             server.start();
             server.join();
@@ -87,6 +95,9 @@ public class HttpServer {
         }
     }
 
+    /**
+     * 挖矿（生成新区块）
+     */
     private class MineBlockServlet extends HttpServlet {
 
         @Override
@@ -107,6 +118,47 @@ public class HttpServer {
             p2p.broadcastLatestBlock();
             // 返回新区块的数据
             resp.getWriter().println(JSON.toJSONString(newBlock));
+        }
+    }
+
+    /**
+     * 连接新节点
+     */
+    private class AddPeerServlet extends HttpServlet {
+        @Override
+        protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+            doPost(req, resp);
+        }
+
+        @Override
+        protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+            resp.setCharacterEncoding("UTF-8");
+            // 从请求参数重获取节点的地址
+            String peer = req.getParameter("peer");
+            // 连接节点
+            p2p.connectToNode(peer);
+            // 返回成功状态
+            resp.getWriter().println(JSON.toJSONString("ok"));
+        }
+    }
+
+    /**
+     * 节点查询列表
+     */
+    private class PeersServlet extends HttpServlet {
+        @Override
+        protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+            resp.setCharacterEncoding("UTF-8");
+            List<Map<String, String>> peers = new ArrayList<Map<String, String>>();
+            for (WebSocket socket : p2p.getSockets()) {
+                InetSocketAddress address = socket.getRemoteSocketAddress();
+                Map<String, String> peerMap = new HashMap<String, String>();
+                peerMap.put("remoteHost", address.getHostName());
+                peerMap.put("remotePort", String.valueOf(address.getPort()));
+                peers.add(peerMap);
+            }
+            String content = JSON.toJSONString(peers);
+            resp.getWriter().println(content);
         }
     }
 

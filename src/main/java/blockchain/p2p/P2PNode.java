@@ -37,6 +37,10 @@ public class P2PNode {
         return blockChain;
     }
 
+    public List<WebSocket> getSockets() {
+        return sockets;
+    }
+
     /**
      * 构造方法
      * @param blockChain
