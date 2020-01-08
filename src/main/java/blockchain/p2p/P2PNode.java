@@ -168,7 +168,7 @@ public class P2PNode {
     /**
      * 广播最新区块
      */
-    private void broadcastLatestBlock() {
+    public void broadcastLatestBlock() {
         broadcast(resLatestBlockMsg());
     }
 

@@ -1,6 +1,7 @@
 package blockchain.http;
 
 import blockchain.p2p.P2PNode;
+import blockchain.pojo.Block;
 import blockchain.pojo.BlockChain;
 import com.alibaba.fastjson.JSON;
 import org.eclipse.jetty.server.Server;
@@ -51,6 +52,7 @@ public class HttpServer {
             context.addServlet(new ServletHolder(new HelloServlet()), "/hello");
 
             context.addServlet(new ServletHolder(new BlocksServlet()), "/blocks");
+            context.addServlet(new ServletHolder(new MineBlockServlet()), "/mineBlock");
 
             server.start();
             server.join();
@@ -82,6 +84,29 @@ public class HttpServer {
             resp.setCharacterEncoding("UTF-8");
             String content = JSON.toJSONString(blockChain.getBlockChain());
             resp.getWriter().println(content);
+        }
+    }
+
+    private class MineBlockServlet extends HttpServlet {
+
+        @Override
+        protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+            doPost(req, resp);
+        }
+
+        @Override
+        protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+            resp.setCharacterEncoding("UTF-8");
+            // 从请求参数中获取新区块中将要保存的数据
+            String data = req.getParameter("data");
+            // 生成新区块
+            Block newBlock = blockChain.generateNextBlock(data);
+            // 把生成的新区块追加到区块链末尾
+            blockChain.addBlock(newBlock);
+            // 向其他节点广播新区块
+            p2p.broadcastLatestBlock();
+            // 返回新区块的数据
+            resp.getWriter().println(JSON.toJSONString(newBlock));
         }
     }
 
